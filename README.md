@@ -1,5 +1,7 @@
 # Launch Extension Releaser Tool
 
+[![Build Status](https://travis-ci.com/adobe/reactor-releaser.svg?branch=master)](https://travis-ci.com/adobe/reactor-releaser)
+
 Launch, by Adobe, is a next-generation tag management solution enabling simplified deployment of marketing technologies. For more information regarding Launch, please visit our [product website](http://www.adobe.com/enterprise/cloud-platform/launch.html).
 
 The releaser tool allows extension developers to easily change the availability of their Launch extension. It can be used to change the availability from `development` to `private`.
