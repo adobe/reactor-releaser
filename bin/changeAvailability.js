@@ -33,13 +33,13 @@ module.exports = async (
         type: 'confirm',
         name: 'confirmPackageRelease',
         message:
-          'An existing extension package with the name ' +
+          'An extension package with the name ' +
           `${
             extensionPackageFromServer.attributes.name
-          } was found on the server and will be released. ` +
-          `The extension version is ${
+          } and development availability was found on the server and will be released. ` +
+          `The extension package version is ${
             extensionPackageFromServer.attributes.version
-          }. Is this the extension package you would like to release?`
+          }. Is this the extension package you would like to release to private availability?`
       }
     ]));
   } else {
