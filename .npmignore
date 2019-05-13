@@ -1,7 +1,8 @@
 __tests__
 .editorconfig
-.eslintrc
+.eslin*
 .prettierrc
 adobe-reactor-releaser-*.tgz
 jasmine.json
 .idea
+.travis.yml
