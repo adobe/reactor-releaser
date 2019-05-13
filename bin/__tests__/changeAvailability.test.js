@@ -15,7 +15,7 @@ const chalk = require('chalk');
 const getReactorHeaders = require('../getReactorHeaders');
 
 const extensionPackageFromServer = {
-  attributes: { name: 'extension name', version: '1.0.0' },
+  attributes: { name: 'extension_name', version: '1.0.0' },
   id: 'EP123'
 };
 
@@ -65,6 +65,16 @@ describe('changeAvailability', () => {
       false
     );
 
+    expect(mockInquirer.prompt).toHaveBeenCalledWith([
+      {
+        type: 'confirm',
+        name: 'confirmPackageRelease',
+        message:
+          'An extension package with the name extension_name at version 1.0.0 ' +
+          'with development availability was found on the server. Would you like ' +
+          'to release this extension package to private availability?'
+      }
+    ]);
     expect(technicalAccountData).toEqual(true);
   });
 
