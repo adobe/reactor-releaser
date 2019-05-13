@@ -1,0 +1,7 @@
+__tests__
+.editorconfig
+.eslintrc
+.prettierrc
+adobe-reactor-releaser-*.tgz
+jasmine.json
+.idea

@@ -1,0 +1,48 @@
+{
+  "name": "@adobe/reactor-releaser",
+  "version": "0.0.1",
+  "description": "Command line tool for releasing Launch extensions.",
+  "author": {
+    "name": "Adobe Systems",
+    "url": "http://adobe.com",
+    "email": "reactor@adobe.com"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Adobe/reactor-releaser.git"
+  },
+  "keywords": [
+    "launch",
+    "extension"
+  ],
+  "bin": {
+    "reactor-releaser": "./bin/index.js"
+  },
+  "scripts": {
+    "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json",
+    "test:watch": "nodemon --exec jasmine JASMINE_CONFIG_PATH=jasmine.json",
+    "lint": "eslint 'bin/**'"
+  },
+  "dependencies": {
+    "@adobe/jwt-auth": "^0.1.0",
+    "chalk": "^2.4.2",
+    "inquirer": "^6.3.1",
+    "prettyjson": "^1.2.1",
+    "request": "^2.88.0",
+    "request-debug": "^0.2.0",
+    "request-promise-native": "^1.0.7",
+    "yargs": "^13.2.2"
+  },
+  "devDependencies": {
+    "jasmine": "^3.4.0",
+    "jasmine-expect": "^4.0.1",
+    "nodemon": "^1.19.0",
+    "proxyquire": "^2.1.0",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.2.0",
+    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-prettier": "^3.0.1",
+    "prettier": "^1.17.0"
+  }
+}
