@@ -3,21 +3,36 @@
     "jasmine": true,
     "node": true
   },
+  "plugins": ["header"],
   "parserOptions": {
     "ecmaVersion": 2017
   },
+
   "extends": ["plugin:prettier/recommended"],
   "rules": {
+    "header/header": [
+      2,
+      "block",
+      [{ "pattern": "\\(c\\) 20\\d{2} Adobe. All rights reserved." }]
+    ],
     "prettier/prettier": "error",
-    "camelcase": [2, {"properties": "always"}],
-    "indent": [2, 2, {"SwitchCase": 1}],
+    "camelcase": [2, { "properties": "always" }],
+    "indent": [2, 2, { "SwitchCase": 1 }],
     "semi": [2, "always"],
     "keyword-spacing": [2],
-    "space-before-function-paren": [2, {"asyncArrow": "always"}],
+    "space-before-function-paren": [2, { "asyncArrow": "always" }],
     "space-before-blocks": [2, "always"],
-    "space-infix-ops": [2, {"int32Hint": false}],
+    "space-infix-ops": [2, { "int32Hint": false }],
     "quotes": [1, "single", "avoid-escape"],
-    "max-len": [2, 100, 4, {"ignoreUrls": true, "ignorePattern": "^(\\s*(var|let|const)\\s.+=\\s*require\\s*\\()|(^\\s*import)"}],
+    "max-len": [
+      2,
+      100,
+      4,
+      {
+        "ignoreUrls": true,
+        "ignorePattern": "^(\\s*(var|let|const)\\s.+=\\s*require\\s*\\()|(^\\s*import)"
+      }
+    ],
     "eqeqeq": [2, "allow-null"],
     "no-nested-ternary": [2],
     "no-underscore-dangle": 0,
@@ -25,8 +40,11 @@
     "one-var": [2, "never"],
     "brace-style": [2, "1tbs", { "allowSingleLine": true }],
     "consistent-this": [0, "self"],
-    "prefer-const": ["error", {
-      "destructuring": "all"
-    }]
+    "prefer-const": [
+      "error",
+      {
+        "destructuring": "all"
+      }
+    ]
   }
 }

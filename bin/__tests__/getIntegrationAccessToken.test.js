@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 /***************************************************************************************
  * (c) 2019 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -10,6 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  ****************************************************************************************/
+
+/* eslint-disable camelcase */
 
 const proxyquire = require('proxyquire');
 
