@@ -70,10 +70,9 @@ describe('changeAvailability', () => {
         type: 'confirm',
         name: 'confirmPackageRelease',
         message:
-          'An extension package with the name extension_name and development availability ' +
-          'was found on the server and will be released. The extension package version is ' +
-          '1.0.0. Is this the extension package you would like to release to private ' +
-          'availability?'
+          'An extension package with the name extension_name at version 1.0.0 ' +
+          'with development availability was found on the server. Would you like ' +
+          'to release this extension package to private availability?'
       }
     ]);
     expect(technicalAccountData).toEqual(true);
