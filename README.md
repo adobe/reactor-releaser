@@ -45,7 +45,7 @@ The named parameters are as follows:
 
 The local path (relative or absolute) to the RSA private key. Instructions on how to generate this key can be found in the [Access Tokens documentation](https://developer.adobelaunch.com/api/guides/access_tokens/) and should have been used when creating your integration through the Adobe I/O console.
 
-Optionally, rather than passing the private key path as a command line argument, it can instead be provided by setting an environment variable. The environment variable should be named `REACTOR_UPLOADER_PRIVATE_KEY`.
+Optionally, rather than passing the private key path as a command line argument, it can instead be provided by setting an environment variable. The environment variable should be named `REACTOR_IO_INTEGRATION_PRIVATE_KEY`.
 
 ##### --org-id (for authentication using an Adobe I/O integration)
 
@@ -63,7 +63,7 @@ Your API key. You can find this on the overview screen for the integration you h
 
 Your client secret. You can find this on the overview screen for the integration you have created within the [Adobe I/O console](https://console.adobe.io).
 
-Optionally, rather than passing the client secret as a command line argument, it can instead be provided by setting an environment variable. The environment variable should be named `REACTOR_UPLOADER_CLIENT_SECRET`.
+Optionally, rather than passing the client secret as a command line argument, it can instead be provided by setting an environment variable. The environment variable should be named `REACTOR_IO_INTEGRATION_CLIENT_SECRET`.
 
 ##### --verbose
 
@@ -71,19 +71,19 @@ Logs additional information useful for debugging.
 
 ##### --environment (for Adobe internal use only)
 
-The environment to which the extension package should be uploaded. Valid options are `development`, `qe`, `integration`. Users outside of Adobe don't need to use this flag.
+The environment to which the extension package should be released. Valid options are `development`, `qe`, `integration`. Users outside of Adobe don't need to use this flag.
 
 Private key path can also be provided by setting an environment variable. The environment variable should be named one of the following, depending on which Launch environment will be receiving the extension package:
 
-* `REACTOR_UPLOADER_PRIVATE_KEY_DEVELOPMENT`
-* `REACTOR_UPLOADER_PRIVATE_KEY_QE`
-* `REACTOR_UPLOADER_PRIVATE_KEY_INTEGRATION`
+* `REACTOR_IO_INTEGRATION_PRIVATE_KEY_DEVELOPMENT`
+* `REACTOR_IO_INTEGRATION_PRIVATE_KEY_QE`
+* `REACTOR_IO_INTEGRATION_PRIVATE_KEY_INTEGRATION`
 
 Client secret can also be provided by setting an environment variable. The environment variable should be named one of the following, depending on which Launch environment will be receiving the extension package:
 
-* `REACTOR_UPLOADER_CLIENT_SECRET_DEVELOPMENT`
-* `REACTOR_UPLOADER_CLIENT_SECRET_QE`
-* `REACTOR_UPLOADER_CLIENT_SECRET_INTEGRATION`
+* `REACTOR_IO_INTEGRATION_CLIENT_SECRET_DEVELOPMENT`
+* `REACTOR_IO_INTEGRATION_CLIENT_SECRET_QE`
+* `REACTOR_IO_INTEGRATION_CLIENT_SECRET_INTEGRATION`
 
 ## Contributing
 
@@ -101,7 +101,7 @@ To manually test your changes, first run the following command from the releaser
 npm link
 ```
 
-Then, in a directory where you would like to use the uploader tool, run the following command:
+Then, in a directory where you would like to use the releaser tool, run the following command:
 
 ```
 npx @adobe/reactor-releaser
