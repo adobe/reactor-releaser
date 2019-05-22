@@ -27,6 +27,7 @@ const expectedAuthOptions = (o = {}) =>
       technicalAccountId: 'MyTechAccountId',
       orgId: 'MyOrgId',
       privateKey: 'privateKey',
+      ims: 'https://ims.com/c/',
       metaScopes: ['https://scope.com/s/ent_reactor_extension_developer_sdk']
     },
     o
@@ -66,7 +67,7 @@ describe('getIntegrationAccessToken', () => {
   it('logs additional detail in verbose mode', async () => {
     const accessToken = await getIntegrationAccessToken(
       {
-        aud: 'https://aud.com/c/',
+        ims: 'https://ims.com/c/',
         scope: 'https://scope.com/s/'
       },
       {
@@ -130,7 +131,7 @@ describe('getIntegrationAccessToken', () => {
     try {
       await getIntegrationAccessToken(
         {
-          aud: 'https://aud.com/c/',
+          ims: 'https://ims.com/c/',
           scope: 'https://scope.com/s/'
         },
         {
