@@ -45,7 +45,8 @@ module.exports = async (
         orgId,
         clientSecret,
         privateKey: privateKeyContent,
-        metaScopes: [`${envConfig.scope}${metascope}`]
+        metaScopes: [`${envConfig.scope}${metascope}`],
+        ims: envConfig.ims
       });
 
       return response.access_token;
