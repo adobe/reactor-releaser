@@ -30,7 +30,7 @@ const expectedAuthOptions = (o = {}) =>
       orgId: 'MyOrgId',
       privateKey: 'privateKey',
       ims: 'https://ims.com/c/',
-      metaScopes: ['https://scope.com/s/ent_reactor_extension_developer_sdk']
+      metaScopes: ['https://scope.com/s/ent_reactor_sdk']
     },
     o
   );
