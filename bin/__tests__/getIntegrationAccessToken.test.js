@@ -15,6 +15,8 @@
 const proxyquire = require('proxyquire');
 
 const METASCOPES = [
+  'ent_reactor_sdk',
+  // The below metascopes are necessary to maintain for integrations created before the ent_reactor_sdk metascope existed.
   'ent_reactor_extension_developer_sdk',
   'ent_reactor_admin_sdk'
 ];
@@ -81,7 +83,7 @@ describe('getIntegrationAccessToken', () => {
     );
 
     expect(mockLogVerboseHeader).toHaveBeenCalledWith(
-      'Authenticating with metascope ent_reactor_extension_developer_sdk'
+      'Authenticating with metascope ent_reactor__sdk'
     );
     expect(mockAuth).toHaveBeenCalledWith(expectedAuthOptions());
     expect(accessToken).toBe('generatedAccessToken');
@@ -145,6 +147,12 @@ describe('getIntegrationAccessToken', () => {
     } catch (error) {
       errorMessage = error.message;
     }
+
+    expect(mockAuth).toHaveBeenCalledWith(
+      expectedAuthOptions({
+        metaScopes: ['https://scope.com/s/ent_reactor_sdk']
+      })
+    );
 
     expect(mockAuth).toHaveBeenCalledWith(
       expectedAuthOptions({
