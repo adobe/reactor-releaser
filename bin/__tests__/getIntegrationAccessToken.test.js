@@ -17,7 +17,7 @@ const proxyquire = require('proxyquire');
 const METASCOPES = [
   'ent_reactor_sdk',
   // The below metascopes are necessary to maintain for integrations 
-  //  created before the ent_reactor_sdk metascope existed
+  // created before the ent_reactor_sdk metascope existed
   'ent_reactor_extension_developer_sdk',
   'ent_reactor_admin_sdk'
 ];
