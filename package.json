@@ -25,7 +25,7 @@
     "lint": "eslint 'bin/**'"
   },
   "dependencies": {
-    "@adobe/jwt-auth": "^0.1.0",
+    "@adobe/jwt-auth": "^0.3.0",
     "chalk": "^2.4.2",
     "inquirer": "^6.3.1",
     "prettyjson": "^1.2.1",
