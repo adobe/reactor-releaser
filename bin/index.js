@@ -72,8 +72,11 @@ const getTechnicalAccountData = require('./getTechnicalAccountData');
     }
 
     const environment = getEnvironment(argv);
-    const technicalAccountData = await getTechnicalAccountData(envConfig, argv);
     const envSpecificConfig = envConfig[environment];
+    const technicalAccountData = await getTechnicalAccountData(
+      envSpecificConfig,
+      argv
+    );
     const integrationAccessToken = await getIntegrationAccessToken(
       envSpecificConfig,
       technicalAccountData
