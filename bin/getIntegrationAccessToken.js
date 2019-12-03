@@ -54,10 +54,15 @@ module.exports = async (
 
       return response.access_token;
     } catch (e) {
-      if (e.error !== 'invalid_scope' || i === METASCOPES.length - 1) {
-        throw new Error(
-          `Error retrieving access token. ${e.error_description}`
-        );
+      const errorMessage =
+        e.message || 'An unknown authentication error occurred.';
+      const isScopeError =
+        errorMessage.toLowerCase().indexOf('invalid_scope') !== -1;
+      const hasCheckedFinalScope = i === METASCOPES.length - 1;
+
+      // throw immediately if we've encountered any error that isn't a scope error
+      if (!isScopeError || hasCheckedFinalScope) {
+        throw new Error(`Error retrieving access token. ${errorMessage}`);
       }
     }
   }

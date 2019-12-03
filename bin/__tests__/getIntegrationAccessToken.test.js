@@ -91,12 +91,8 @@ describe('getIntegrationAccessToken', () => {
   });
 
   it('reports error retrieving access token', async () => {
-    mockAuth.and.returnValue(
-      Promise.reject({
-        error: 'some error',
-        error_description: 'Bad things happened.'
-      })
-    );
+    const mockedAuthError = 'Bad things happened.';
+    mockAuth.and.returnValue(Promise.reject(new Error(mockedAuthError)));
 
     let errorMessage;
 
@@ -117,18 +113,17 @@ describe('getIntegrationAccessToken', () => {
       errorMessage = error.message;
     }
 
+    // we bailed after the first call because it wasn't a scoping error
+    expect(mockAuth.calls.count()).toBe(1);
+
     expect(errorMessage).toBe(
-      'Error retrieving access token. Bad things happened.'
+      `Error retrieving access token. ${mockedAuthError}`
     );
   });
 
   it('attempts authenticating with each supported metascope', async () => {
-    mockAuth.and.returnValue(
-      Promise.reject({
-        error: 'invalid_scope',
-        error_description: 'Invalid metascope.'
-      })
-    );
+    const mockedAuthError = 'invalid_scope: Invalid metascope.';
+    mockAuth.and.returnValue(Promise.reject(new Error(mockedAuthError)));
 
     let errorMessage;
     try {
@@ -170,7 +165,34 @@ describe('getIntegrationAccessToken', () => {
     // This tests that if all metascopes fail,
     // the error from the last attempt is ultimately thrown.
     expect(errorMessage).toBe(
-      'Error retrieving access token. Invalid metascope.'
+      `Error retrieving access token. ${mockedAuthError}`
+    );
+  });
+
+  it('contains a fallback message for authentication errors', async () => {
+    // don't supply a message during auth failure
+    mockAuth.and.returnValue(Promise.reject(new Error()));
+
+    let errorMessage;
+    try {
+      await getIntegrationAccessToken(
+        {
+          scope: 'https://scope.com/s/'
+        },
+        {
+          privateKey: 'MyPrivateKey',
+          orgId: 'MyOrgId',
+          techAccountId: 'MyTechAccountId',
+          apiKey: 'MyApiKey',
+          clientSecret: 'MyClientSecret'
+        }
+      );
+    } catch (error) {
+      errorMessage = error.message;
+    }
+
+    expect(errorMessage).toBe(
+      'Error retrieving access token. An unknown authentication error occurred.'
     );
   });
 });
