@@ -70,7 +70,7 @@ this extension package to private availability?`
     },
     json: true,
     headers: getReactorHeaders(accessToken, apiKey),
-    transform: body => body
+    transform: (body) => body
   };
 
   try {

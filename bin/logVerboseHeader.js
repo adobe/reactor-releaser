@@ -12,6 +12,6 @@
 
 const DIVIDER = '----------';
 
-module.exports = message => {
+module.exports = (message) => {
   console.log(`\n${DIVIDER}\n${message}\n${DIVIDER}`);
 };

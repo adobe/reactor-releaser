@@ -10,4 +10,4 @@
  * governing permissions and limitations under the License.
  ****************************************************************************************/
 
-module.exports = argv => argv.environment || 'production';
+module.exports = (argv) => argv.environment || 'production';
