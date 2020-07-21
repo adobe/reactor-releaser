@@ -48,7 +48,7 @@ describe('getTechnicalAccountData', () => {
   });
 
   it('prompts for data', async () => {
-    mockInquirer.prompt.and.callFake(prompts => {
+    mockInquirer.prompt.and.callFake((prompts) => {
       switch (prompts[0].name) {
         case 'authMethod':
           return { authMethod: 'integration' };

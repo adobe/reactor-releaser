@@ -13,6 +13,6 @@
 const os = require('os');
 const prettyjson = require('prettyjson');
 
-module.exports = error => {
+module.exports = (error) => {
   return os.EOL + prettyjson.render(error);
 };

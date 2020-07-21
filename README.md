@@ -11,11 +11,7 @@ For more information about developing an extension for Launch, please visit our 
 
 ## Usage
 
-Before running the releaser tool, you must first have [Node.js](https://nodejs.org/en/) installed on your computer. Your npm version (npm comes bundled with Node.js) will need to be at least 5.2.0. You can check the installed version by running the following command from a command line:
-
-```
-npm -v
-```
+Before running the releaser tool, you must first have [Node.js](https://nodejs.org/en/) installed on your computer.
 
 You will need to be authorized to release extensions in Launch. This is done by first creating an integration through Adobe I/O. Please see the [Access Tokens documentation](https://developer.adobelaunch.com/api/guides/access_tokens/) for detailed steps on creating an integration and procuring extension management rights.
 
