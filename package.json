@@ -1,6 +1,6 @@
 {
   "name": "@adobe/reactor-releaser",
-  "version": "2.1.2",
+  "version": "3.0.0",
   "description": "Command line tool for releasing Launch extensions.",
   "author": {
     "name": "Adobe Systems",
