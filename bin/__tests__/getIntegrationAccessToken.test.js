@@ -36,6 +36,17 @@ const expectedAuthOptions = (o = {}) =>
     o
   );
 
+const mockServerErrorResponse = (message, code) => {
+  const newError = new Error(message);
+  newError.code = code;
+  return newError;
+};
+
+const mockUnhandledException = (message) => {
+  // this error has no "code" attribute
+  return new Error(message);
+};
+
 describe('getIntegrationAccessToken', () => {
   let getIntegrationAccessToken;
   let mockFs;
@@ -91,11 +102,13 @@ describe('getIntegrationAccessToken', () => {
   });
 
   it('reports error retrieving access token', async () => {
-    const mockedAuthError = 'Bad things happened.';
-    mockAuth.and.returnValue(Promise.reject(new Error(mockedAuthError)));
+    const mockedAuthError = mockServerErrorResponse(
+      'some error: Bad things happened',
+      'server_error_code'
+    );
+    mockAuth.and.returnValue(Promise.reject(mockedAuthError));
 
-    let errorMessage;
-
+    let returnedError;
     try {
       await getIntegrationAccessToken(
         {
@@ -110,22 +123,34 @@ describe('getIntegrationAccessToken', () => {
         }
       );
     } catch (error) {
-      errorMessage = error.message;
+      returnedError = error;
     }
 
     // we bailed after the first call because it wasn't a scoping error
     expect(mockAuth.calls.count()).toBe(1);
 
-    expect(errorMessage).toBe(
-      `Error retrieving access token. ${mockedAuthError}`
-    );
+    expect(
+      returnedError.message.includes('Error retrieving your Access Token:')
+    ).toBeTrue();
+    expect(
+      returnedError.message.includes(
+        'Error Message: some error: Bad things happened'
+      )
+    ).toBeTrue();
+    expect(
+      returnedError.message.includes('Error Code: server_error_code')
+    ).toBeTrue();
+    expect(returnedError.code).toBe('server_error_code');
   });
 
   it('attempts authenticating with each supported metascope', async () => {
-    const mockedAuthError = 'invalid_scope: Invalid metascope.';
-    mockAuth.and.returnValue(Promise.reject(new Error(mockedAuthError)));
+    const mockedAuthError = mockServerErrorResponse(
+      'invalid_scope: Invalid metascope.',
+      'invalid_scope'
+    );
+    mockAuth.and.returnValue(Promise.reject(mockedAuthError));
 
-    let errorMessage;
+    let returnedError;
     try {
       await getIntegrationAccessToken(
         {
@@ -141,7 +166,7 @@ describe('getIntegrationAccessToken', () => {
         }
       );
     } catch (error) {
-      errorMessage = error.message;
+      returnedError = error;
     }
 
     expect(mockAuth).toHaveBeenCalledWith(
@@ -162,18 +187,137 @@ describe('getIntegrationAccessToken', () => {
       })
     );
     expect(mockAuth.calls.count()).toBe(METASCOPES.length);
-    // This tests that if all metascopes fail,
-    // the error from the last attempt is ultimately thrown.
-    expect(errorMessage).toBe(
-      `Error retrieving access token. ${mockedAuthError}`
+    // This tests that if all metascopes fail, the error from the last attempt is ultimately thrown.
+    expect(
+      returnedError.message.includes('Error retrieving your Access Token:')
+    ).toBeTrue();
+    expect(
+      returnedError.message.includes(
+        'Error Message: invalid_scope: Invalid metascope.'
+      )
+    ).toBeTrue();
+    expect(
+      returnedError.message.includes('Error Code: invalid_scope')
+    ).toBeTrue();
+    expect(returnedError.code).toBe('invalid_scope');
+  });
+
+  it('throws a stack trace when error.code is missing', async () => {
+    const mockedAuthError = mockUnhandledException('500 server error');
+    mockAuth.and.returnValue(Promise.reject(mockedAuthError));
+
+    let returnedError;
+    try {
+      // should be going through a bunch of scopes
+      await getIntegrationAccessToken(
+        {
+          ims: 'https://ims.com/c/',
+          scope: 'https://scope.com/s/'
+        },
+        {
+          privateKey: 'MyPrivateKey',
+          orgId: 'MyOrgId',
+          techAccountId: 'MyTechAccountId',
+          apiKey: 'MyApiKey',
+          clientSecret: 'MyClientSecret'
+        }
+      );
+    } catch (error) {
+      returnedError = error;
+    }
+
+    // however, when we don't see an error.code, we bail and report
+    expect(mockAuth.calls.count()).toBe(1);
+    // the message should not have any of our pretty formatting
+    expect(returnedError.message).toBe('500 server error');
+    expect(returnedError.code).toBeFalsy();
+  });
+
+  it('throws a stack trace when --verbose and request_failed', async () => {
+    const mockedAuthError = mockServerErrorResponse(
+      'some error',
+      'request_failed'
     );
+    mockAuth.and.returnValue(Promise.reject(mockedAuthError));
+
+    let returnedError;
+    try {
+      // should be going through a bunch of scopes
+      await getIntegrationAccessToken(
+        {
+          ims: 'https://ims.com/c/',
+          scope: 'https://scope.com/s/'
+        },
+        {
+          privateKey: 'MyPrivateKey',
+          orgId: 'MyOrgId',
+          techAccountId: 'MyTechAccountId',
+          apiKey: 'MyApiKey',
+          clientSecret: 'MyClientSecret',
+          verbose: true
+        }
+      );
+    } catch (error) {
+      returnedError = error;
+    }
+
+    // however, when we don't see an error.code, we bail and report
+    expect(mockAuth.calls.count()).toBe(1);
+    // the message should not have any of our pretty formatting
+    expect(returnedError.message).toBe('some error');
+    expect(returnedError.code).toBe('request_failed');
+  });
+
+  it('shows JS error details in case they happen', async () => {
+    const mockedAuthError = mockServerErrorResponse(
+      'some error',
+      'server_error_code'
+    );
+    mockAuth.and.returnValue(Promise.reject(mockedAuthError));
+
+    let returnedError;
+    try {
+      await getIntegrationAccessToken(
+        {
+          ims: 'https://ims.com/c/',
+          scope: 'https://scope.com/s/'
+        },
+        {
+          privateKey: 'MyPrivateKey',
+          orgId: 'MyOrgId',
+          techAccountId: 'MyTechAccountId',
+          apiKey: 'MyApiKey',
+          clientSecret: 'MyClientSecret'
+        }
+      );
+    } catch (error) {
+      returnedError = error;
+    }
+
+    // we bailed after the first call because it wasn't a scoping error
+    expect(mockAuth.calls.count()).toBe(1);
+
+    expect(
+      returnedError.message.includes('Error retrieving your Access Token:')
+    ).toBeTrue();
+    expect(
+      returnedError.message.includes('Error Message: some error')
+    ).toBeTrue();
+    expect(
+      returnedError.message.includes('Error Code: server_error_code')
+    ).toBeTrue();
+    expect(returnedError.code).toBe('server_error_code');
   });
 
   it('contains a fallback message for authentication errors', async () => {
     // don't supply a message during auth failure
-    mockAuth.and.returnValue(Promise.reject(new Error()));
+    const mockedAuthError = mockServerErrorResponse(
+      undefined,
+      'server_error_code'
+    );
+    mockAuth.and.returnValue(Promise.reject(mockedAuthError));
 
-    let errorMessage;
+    let returnedError;
     try {
       await getIntegrationAccessToken(
         {
@@ -188,11 +332,20 @@ describe('getIntegrationAccessToken', () => {
         }
       );
     } catch (error) {
-      errorMessage = error.message;
+      returnedError = error;
     }
 
-    expect(errorMessage).toBe(
-      'Error retrieving access token. An unknown authentication error occurred.'
-    );
+    expect(
+      returnedError.message.includes('Error retrieving your Access Token:')
+    ).toBeTrue();
+    expect(
+      returnedError.message.includes(
+        'Error Message: An unknown authentication error occurred'
+      )
+    ).toBeTrue();
+    expect(
+      returnedError.message.includes('Error Code: server_error_code')
+    ).toBeTrue();
+    expect(returnedError.code).toBe('server_error_code');
   });
 });

@@ -67,7 +67,6 @@ const getTechnicalAccountData = require('./getTechnicalAccountData');
 
 (async () => {
   try {
-    console.log('running releaser local')
     if (argv.verbose) {
       require('request-debug')(require('request-promise-native'), function (
         type,
@@ -111,11 +110,12 @@ const getTechnicalAccountData = require('./getTechnicalAccountData');
       argv.verbose
     );
   } catch (error) {
-    if (argv.verbose) {
+    if (argv.verbose || !error.code) {
       throw error;
     }
 
     console.log(chalk.bold.red(error.message));
+    console.log(chalk.bold.red('run in --verbose mode for full stack trace'));
     process.exitCode = 1;
   }
 })();
