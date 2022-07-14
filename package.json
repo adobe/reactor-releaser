@@ -1,7 +1,7 @@
 {
   "name": "@adobe/reactor-releaser",
   "version": "3.0.3",
-  "description": "Command line tool for releasing Launch extensions.",
+  "description": "Command line tool for releasing Tags extensions.",
   "author": {
     "name": "Adobe Systems",
     "url": "http://adobe.com",
