@@ -1,19 +1,19 @@
-# Experience Platform Tags Extension Releaser Tool
+# Adobe Experience Platform Tags Extension Releaser Tool
 
 [![Build Status](https://travis-ci.com/adobe/reactor-releaser.svg?branch=master)](https://travis-ci.com/adobe/reactor-releaser)
 [![npm (scoped)](https://img.shields.io/npm/v/@adobe/reactor-releaser.svg?style=flat)](https://www.npmjs.com/package/@adobe/reactor-releaser)
 
-Experience Platform Tags, by Adobe, is a next-generation tag management solution enabling simplified deployment of marketing technologies. For more information regarding Experience Platform Tags, please visit our [product website](http://www.adobe.com/enterprise/cloud-platform/launch.html).
+Adobe Experience Platform Tags is a next-generation tag management solution enabling simplified deployment of marketing technologies. For more information regarding Tags, please visit our [product website](http://www.adobe.com/enterprise/cloud-platform/launch.html).
 
-The releaser tool allows extension developers to easily change the availability of their Experience Platform Tags extension. It can be used to change the availability from `development` to `private`.
+The releaser tool allows extension developers to easily change the availability of their Tags extension. It can be used to change the availability from `development` to `private`.
 
-For more information about developing an extension for Experience Platform Tags, please visit our [extension development guide](https://experienceleague.adobe.com/docs/experience-platform/tags/extension-dev/overview.html?lang=en).
+For more information about developing an extension for Tags, please visit our [extension development guide](https://experienceleague.adobe.com/docs/experience-platform/tags/extension-dev/overview.html).
 
 ## Usage
 
 Before running the releaser tool, you must first have [Node.js](https://nodejs.org/en/) installed on your computer.
 
-You will need to be authorized to release extensions in Experience Platform Tags. This is done by first creating an integration through Adobe I/O. Please see the [Access Tokens documentation](https://experienceleague.adobe.com/docs/experience-platform/landing/platform-apis/api-authentication.html) for detailed steps on creating an integration and procuring extension management rights.
+You will need to be authorized to release extensions in Tags. This is done by first creating an integration through Adobe I/O. Please see the [Access Tokens documentation](https://experienceleague.adobe.com/docs/experience-platform/landing/platform-apis/api-authentication.html) for detailed steps on creating an integration and procuring extension management rights.
 
 Once you've been granted extension management rights, you can use the releaser tool in either a question-answer format or by passing information through command line arguments.
 
@@ -69,13 +69,13 @@ Logs additional information useful for debugging.
 
 The environment to which the extension package should be released. Valid options are `development`, `qe`, `integration`. Users outside of Adobe don't need to use this flag.
 
-Private key path can also be provided by setting an environment variable. The environment variable should be named one of the following, depending on which Experience Platform Tags environment will be receiving the extension package:
+Private key path can also be provided by setting an environment variable. The environment variable should be named one of the following, depending on which Tags environment will be receiving the extension package:
 
 * `REACTOR_IO_INTEGRATION_PRIVATE_KEY_DEVELOPMENT`
 * `REACTOR_IO_INTEGRATION_PRIVATE_KEY_QE`
 * `REACTOR_IO_INTEGRATION_PRIVATE_KEY_INTEGRATION`
 
-Client secret can also be provided by setting an environment variable. The environment variable should be named one of the following, depending on which Experience Platform Tags environment will be receiving the extension package:
+Client secret can also be provided by setting an environment variable. The environment variable should be named one of the following, depending on which Tags environment will be receiving the extension package:
 
 * `REACTOR_IO_INTEGRATION_CLIENT_SECRET_DEVELOPMENT`
 * `REACTOR_IO_INTEGRATION_CLIENT_SECRET_QE`
