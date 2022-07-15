@@ -12,6 +12,7 @@
  * governing permissions and limitations under the License.
  ****************************************************************************************/
 
+/* eslint-disable-next-line header/header */
 const argv = require('yargs')
   .usage('Usage: $0 [options]')
   .options({
