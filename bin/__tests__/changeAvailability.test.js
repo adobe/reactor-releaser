@@ -22,157 +22,216 @@ const extensionPackageFromServer = {
 const extensionManifest = { name: 'fake-extension' };
 const envConfig = { extensionPackages: 'https://extensionpackages.com' };
 const token = 'generatedAccessToken';
+let verbose;
+let confirmPackageRelease;
 
 describe('changeAvailability', () => {
   let mockRequest;
   let mockHandleResponseError;
   let mockLogVerboseHeader;
   let changeAvailability;
-  let mockInquirer;
 
   beforeEach(() => {
+    verbose = false;
+    confirmPackageRelease = false;
     mockRequest = jasmine.createSpy().and.returnValue({
       data: {
         id: 'EP123'
       }
     });
 
-    mockInquirer = {
-      prompt: jasmine
-        .createSpy()
-        .and.returnValue({ confirmPackageRelease: true })
-    };
-
     mockHandleResponseError = jasmine.createSpy().and.throwError();
     mockLogVerboseHeader = jasmine.createSpy();
     spyOn(console, 'log');
+  });
 
-    changeAvailability = proxyquire('../changeAvailability', {
-      'request-promise-native': mockRequest,
-      './handleResponseError': mockHandleResponseError,
-      './logVerboseHeader': mockLogVerboseHeader,
-      inquirer: mockInquirer
+  describe('without mock Inquirer', () => {
+    beforeEach(() => {
+      changeAvailability = proxyquire('../changeAvailability', {
+        'request-promise-native': mockRequest,
+        './handleResponseError': mockHandleResponseError,
+        './logVerboseHeader': mockLogVerboseHeader
+      });
+    });
+
+    it('can release silently', async () => {
+      confirmPackageRelease = true;
+      await changeAvailability(
+        envConfig,
+        token,
+        extensionPackageFromServer,
+        extensionManifest,
+        { apiKey: 'apiKey' },
+        verbose,
+        confirmPackageRelease
+      );
+
+      expect(mockRequest).toHaveBeenCalledWith({
+        method: 'PATCH',
+        url: 'https://extensionpackages.com/EP123',
+        body: {
+          data: {
+            id: 'EP123',
+            type: 'extension_packages',
+            meta: { action: 'release_private' }
+          }
+        },
+        json: true,
+        headers: getReactorHeaders('generatedAccessToken', 'apiKey'),
+        transform: jasmine.any(Function)
+      });
+
+      expect(console.log).toHaveBeenCalledWith(
+        `The extension package with the ID ${chalk.bold(
+          'EP123'
+        )} has been released.`
+      );
     });
   });
 
-  it('prompts for confirmation of package release', async () => {
-    const technicalAccountData = await changeAvailability(
-      envConfig,
-      token,
-      extensionPackageFromServer,
-      extensionManifest,
-      {},
-      false
-    );
+  describe('with mock Inquirer', () => {
+    let mockInquirer;
 
-    expect(mockInquirer.prompt).toHaveBeenCalledWith([
-      {
-        type: 'confirm',
-        name: 'confirmPackageRelease',
-        message:
-          'An extension package with the name extension_name at version 1.0.0 ' +
-          'with development availability was found on the server. Would you like ' +
-          'to release this extension package to private availability?'
-      }
-    ]);
-    expect(technicalAccountData).toEqual(true);
-  });
+    beforeEach(() => {
+      mockInquirer = {
+        prompt: jasmine
+          .createSpy()
+          .and.returnValue({ confirmPackageRelease: true })
+      };
 
-  it('returns false when the user does not confirm the package details', async () => {
-    mockInquirer.prompt.and.returnValue({ confirmPackageRelease: false });
+      changeAvailability = proxyquire('../changeAvailability', {
+        'request-promise-native': mockRequest,
+        './handleResponseError': mockHandleResponseError,
+        './logVerboseHeader': mockLogVerboseHeader,
+        inquirer: mockInquirer
+      });
+    });
 
-    const technicalAccountData = await changeAvailability(
-      envConfig,
-      token,
-      extensionPackageFromServer,
-      extensionManifest,
-      {},
-      false
-    );
+    it('prompts for confirmation of package release', async () => {
+      const technicalAccountData = await changeAvailability(
+        envConfig,
+        token,
+        extensionPackageFromServer,
+        extensionManifest,
+        {},
+        verbose,
+        confirmPackageRelease
+      );
 
-    expect(technicalAccountData).toEqual(false);
-  });
+      expect(mockInquirer.prompt).toHaveBeenCalledWith([
+        {
+          type: 'confirm',
+          name: 'confirmPackageRelease',
+          message:
+            'An extension package with the name extension_name at version 1.0.0 ' +
+            'with development availability was found on the server. Would you like ' +
+            'to release this extension package to private availability?'
+        }
+      ]);
+      expect(technicalAccountData).toEqual(true);
+    });
 
-  it('logs an error when no package that can be released is found on server', async () => {
-    await changeAvailability(
-      envConfig,
-      token,
-      null,
-      extensionManifest,
-      {},
-      false
-    );
+    it('returns false when the user does not confirm the package details', async () => {
+      mockInquirer.prompt.and.returnValue({ confirmPackageRelease: false });
 
-    expect(console.log).toHaveBeenCalledWith(
-      `No extension package was found on the server with the name ${chalk.bold(
-        'fake-extension'
-      )} and development availability.`
-    );
-  });
+      const technicalAccountData = await changeAvailability(
+        envConfig,
+        token,
+        extensionPackageFromServer,
+        extensionManifest,
+        {},
+        verbose,
+        confirmPackageRelease
+      );
 
-  it('logs additional detail in verbose mode', async () => {
-    await changeAvailability(
-      envConfig,
-      token,
-      extensionPackageFromServer,
-      extensionManifest,
-      {},
-      true
-    );
+      expect(technicalAccountData).toEqual(false);
+    });
 
-    expect(mockLogVerboseHeader).toHaveBeenCalledWith('Releasing package');
-  });
+    it('logs an error when no package that can be released is found on server', async () => {
+      await changeAvailability(
+        envConfig,
+        token,
+        null,
+        extensionManifest,
+        {},
+        false
+      );
 
-  it('calls handleResponseError on response error', async () => {
-    const error = new Error();
-    mockRequest.and.throwError(error);
+      expect(console.log).toHaveBeenCalledWith(
+        `No extension package was found on the server with the name ${chalk.bold(
+          'fake-extension'
+        )} and development availability.`
+      );
+    });
 
-    try {
+    it('logs additional detail in verbose mode', async () => {
+      verbose = true;
       await changeAvailability(
         envConfig,
         token,
         extensionPackageFromServer,
         extensionManifest,
         {},
-        false
+        verbose,
+        confirmPackageRelease
       );
-    } catch (e) {}
 
-    expect(mockHandleResponseError).toHaveBeenCalledWith(
-      error,
-      jasmine.any(String)
-    );
-  });
-
-  it('releases an extension package', async () => {
-    await changeAvailability(
-      envConfig,
-      token,
-      extensionPackageFromServer,
-      extensionManifest,
-      { apiKey: 'apiKey' },
-      false
-    );
-
-    expect(mockRequest).toHaveBeenCalledWith({
-      method: 'PATCH',
-      url: 'https://extensionpackages.com/EP123',
-      body: {
-        data: {
-          id: 'EP123',
-          type: 'extension_packages',
-          meta: { action: 'release_private' }
-        }
-      },
-      json: true,
-      headers: getReactorHeaders('generatedAccessToken', 'apiKey'),
-      transform: jasmine.any(Function)
+      expect(mockLogVerboseHeader).toHaveBeenCalledWith('Releasing package');
     });
 
-    expect(console.log).toHaveBeenCalledWith(
-      `The extension package with the ID ${chalk.bold(
-        'EP123'
-      )} has been released.`
-    );
+    it('calls handleResponseError on response error', async () => {
+      const error = new Error();
+      mockRequest.and.throwError(error);
+
+      try {
+        await changeAvailability(
+          envConfig,
+          token,
+          extensionPackageFromServer,
+          extensionManifest,
+          {},
+          verbose,
+          confirmPackageRelease
+        );
+      } catch (e) {}
+
+      expect(mockHandleResponseError).toHaveBeenCalledWith(
+        error,
+        jasmine.any(String)
+      );
+    });
+
+    it('releases an extension package', async () => {
+      await changeAvailability(
+        envConfig,
+        token,
+        extensionPackageFromServer,
+        extensionManifest,
+        { apiKey: 'apiKey' },
+        verbose,
+        confirmPackageRelease
+      );
+
+      expect(mockRequest).toHaveBeenCalledWith({
+        method: 'PATCH',
+        url: 'https://extensionpackages.com/EP123',
+        body: {
+          data: {
+            id: 'EP123',
+            type: 'extension_packages',
+            meta: { action: 'release_private' }
+          }
+        },
+        json: true,
+        headers: getReactorHeaders('generatedAccessToken', 'apiKey'),
+        transform: jasmine.any(Function)
+      });
+
+      expect(console.log).toHaveBeenCalledWith(
+        `The extension package with the ID ${chalk.bold(
+          'EP123'
+        )} has been released.`
+      );
+    });
   });
 });

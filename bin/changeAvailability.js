@@ -23,22 +23,23 @@ module.exports = async (
   extensionPackageFromServer,
   extensionPackageManifest,
   { apiKey },
-  verbose
+  verbose,
+  confirmPackageRelease = false
 ) => {
-  let confirmPackageRelease = false;
-
   if (extensionPackageFromServer) {
-    ({ confirmPackageRelease } = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'confirmPackageRelease',
-        message: `An extension package with the name \
+    if (!confirmPackageRelease) {
+      ({ confirmPackageRelease } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'confirmPackageRelease',
+          message: `An extension package with the name \
 ${extensionPackageFromServer.attributes.name} at version \
 ${extensionPackageFromServer.attributes.version} with development \
 availability was found on the server. Would you like to release \
 this extension package to private availability?`
-      }
-    ]));
+        }
+      ]));
+    }
   } else {
     console.log(
       'No extension package was found ' +
