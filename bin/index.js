@@ -51,6 +51,11 @@ const argv = require('yargs')
     verbose: {
       type: 'boolean',
       describe: 'Logs additional information useful for debugging.'
+    },
+    'yes-to-release': {
+      type: 'boolean',
+      describe:
+        'Answer "yes" if a development extension is found that is ready to be released.'
     }
   })
   .epilogue(
@@ -117,7 +122,8 @@ const getTechnicalAccountData = require('./getTechnicalAccountData');
       extensionPackageFromServer,
       extensionPackageManifest,
       technicalAccountData,
-      argv.verbose
+      argv.verbose,
+      argv['yes-to-release']
     );
   } catch (error) {
     if (argv.verbose || !error.code) {
