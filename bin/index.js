@@ -19,7 +19,7 @@ const argv = require('yargs')
     'private-key': {
       type: 'string',
       describe:
-        'For authentication using an Adobe I/O integration. The local path (relative or absolute) to the RSA private key. Instructions on how to generate this key can be found in the Getting Started guide (https://developer.adobelaunch.com/guides/extensions/getting-started/) and should have been used when creating your integration through the Adobe I/O console. Optionally, rather than passing the private key path as a command line argument, it can instead be provided by setting one of the following environment variables, depending on the environment that will be receiving the extension package: REACTOR_IO_INTEGRATION_PRIVATE_KEY_DEVELOPMENT, REACTOR_IO_INTEGRATION_PRIVATE_KEY_QE, REACTOR_IO_INTEGRATION_PRIVATE_KEY_INTEGRATION, REACTOR_IO_INTEGRATION_PRIVATE_KEY'
+        'For authentication using an Adobe I/O integration. The local path (relative or absolute) to the RSA private key. Instructions on how to generate this key can be found in the Getting Started guide (https://developer.adobelaunch.com/guides/extensions/getting-started/) and should have been used when creating your integration through the Adobe I/O console. Optionally, rather than passing the private key path as a command line argument, it can instead be provided by setting one of the following environment variables, depending on the environment that will be receiving the extension package: REACTOR_IO_INTEGRATION_PRIVATE_KEY_DEVELOPMENT, REACTOR_IO_INTEGRATION_PRIVATE_KEY_QE, REACTOR_IO_INTEGRATION_PRIVATE_KEY_STAGE, REACTOR_IO_INTEGRATION_PRIVATE_KEY. REACTOR_IO_INTEGRATION_PRIVATE_KEY_QE is deprecated in favor of REACTOR_IO_INTEGRATION_PRIVATE_KEY_STAGE and will be removed in the future.'
     },
     'org-id': {
       type: 'string',
@@ -39,7 +39,7 @@ const argv = require('yargs')
     'client-secret': {
       type: 'string',
       describe:
-        'For authentication using an Adobe I/O integration. Your client secret. You can find this on the overview screen for the integration you have created within the Adobe I/O console (https://console.adobe.io). Optionally, rather than passing the client secret as a command line argument, it can instead be provided by setting one of the following environment variables, depending on the environment that will be receiving the extension package: REACTOR_IO_INTEGRATION_CLIENT_SECRET_DEVELOPMENT, REACTOR_IO_INTEGRATION_CLIENT_SECRET_QE, REACTOR_IO_INTEGRATION_CLIENT_SECRET_INTEGRATION, REACTOR_IO_INTEGRATION_CLIENT_SECRET'
+        'For authentication using an Adobe I/O integration. Your client secret. You can find this on the overview screen for the integration you have created within the Adobe I/O console (https://console.adobe.io). Optionally, rather than passing the client secret as a command line argument, it can instead be provided by setting one of the following environment variables, depending on the environment that will be receiving the extension package:  REACTOR_IO_INTEGRATION_CLIENT_SECRET_DEVELOPMENT, REACTOR_IO_INTEGRATION_CLIENT_SECRET_QE, REACTOR_IO_INTEGRATION_CLIENT_SECRET_STAGE, REACTOR_IO_INTEGRATION_CLIENT_SECRET. REACTOR_IO_INTEGRATION_CLIENT_SECRET_QE is deprecated in favor of REACTOR_IO_INTEGRATION_CLIENT_SECRET_STAGE and will be removed in the future.'
     },
     environment: {
       type: 'string',
@@ -84,6 +84,15 @@ const getTechnicalAccountData = require('./getTechnicalAccountData');
     }
 
     const environment = getEnvironment(argv);
+    if (environment === 'qe') {
+      console.log(
+        chalk.bold.red(
+          "'--environment=qe' is currently redirecting to '--environment=stage' on your behalf, " +
+            'and will be removed in the future.'
+        )
+      );
+      console.log(chalk.bold.red("Prefer usage of '--environment=stage'."));
+    }
     const envSpecificConfig = envConfig[environment];
     const technicalAccountData = await getTechnicalAccountData(
       envSpecificConfig,
