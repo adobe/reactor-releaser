@@ -1,6 +1,6 @@
 {
   "name": "@adobe/reactor-releaser",
-  "version": "3.1.0",
+  "version": "3.1.1-beta.0",
   "description": "Command line tool for releasing Tags extensions.",
   "author": {
     "name": "Adobe Systems",
@@ -25,7 +25,7 @@
     "lint": "eslint 'bin/**'"
   },
   "dependencies": {
-    "@adobe/jwt-auth": "^1.0.1",
+    "@adobe/jwt-auth": "^2.0.0",
     "chalk": "^4.1.0",
     "inquirer": "^7.3.2",
     "prettyjson": "^1.2.1",
