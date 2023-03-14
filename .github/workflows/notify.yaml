@@ -2,15 +2,16 @@ name: CI notify
 
 # Only trigger, when the build workflow succeeded
 on:
-  workflow_run:
-    workflows: ['Node.js Package']
-    types:
-      - completed
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: 'string'
 
 jobs:
   notify-on-success:
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.tag == 'latest' && github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ inputs.tag == 'latest'}}
     steps:
       - uses: actions/checkout@v2
       - name: Get latest tag
@@ -22,24 +23,24 @@ jobs:
       - name: Notify Slack of Release
         uses: tokorom/action-slack-incoming-webhook@main
         env:
-         INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
-         text: "A new version of ${{ github.event.repository.full_name }}[${{ steps.repoTag.outputs.tag }}] has been released"
-         attachments: |
-          [
-            {
-              "color": "good",
-              "author_name": "${{ github.actor }}",
-              "author_icon": "${{ github.event.sender.avatar_url }}",
-              "fields": [
-                {
-                  "title": "Repo URL",
-                  "value": "${{ github.event.repository.html_url }}"
-                },
-                {
-                  "title": "See Releases",
-                  "value": "${{ github.event.repository.html_url }}/releases"
-                }
-             ]
-            }
-          ]
+          text: "A new version of ${{ github.event.repository.full_name }}[${{ steps.repoTag.outputs.tag }}] has been released"
+          attachments: |
+            [
+              {
+                "color": "good",
+                "author_name": "${{ github.actor }}",
+                "author_icon": "${{ github.event.sender.avatar_url }}",
+                "fields": [
+                  {
+                    "title": "Repo URL",
+                    "value": "${{ github.event.repository.html_url }}"
+                  },
+                  {
+                    "title": "See Releases",
+                    "value": "${{ github.event.repository.html_url }}/releases"
+                  }
+               ]
+              }
+            ]
