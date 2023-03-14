@@ -46,7 +46,7 @@ const argv = require('yargs')
       describe:
         'The environment to which the extension package \
         should be released (for Adobe internal use only).',
-      choices: ['development', 'qe', 'integration']
+      choices: ['stage', 'qe', 'integration']
     },
     verbose: {
       type: 'boolean',
