@@ -11,7 +11,7 @@
  ****************************************************************************************/
 
 const chalk = require('chalk');
-const request = require('request-promise-native');
+const fetchWrapper = require('./fetchWrapper');
 const inquirer = require('inquirer');
 const getReactorHeaders = require('./getReactorHeaders');
 const handleResponseError = require('./handleResponseError');
@@ -56,25 +56,24 @@ this extension package to private availability?`
     logVerboseHeader('Releasing package');
   }
 
+  const url = `${envConfig.extensionPackages}/${extensionPackageFromServer.id}`;
+  const formData = new FormData();
+  formData.append('data', {
+    id: extensionPackageFromServer.id,
+    type: 'extension_packages',
+    meta: {
+      action: 'release_private'
+    }
+  });
   const options = {
     method: 'PATCH',
-    url: `${envConfig.extensionPackages}/${extensionPackageFromServer.id}`,
-    body: {
-      data: {
-        id: extensionPackageFromServer.id,
-        type: 'extension_packages',
-        meta: {
-          action: 'release_private'
-        }
-      }
-    },
-    json: true,
     headers: getReactorHeaders(accessToken),
-    transform: (body) => body
+    body: formData
   };
 
   try {
-    const body = await request(options);
+    const response = await fetchWrapper.fetch(url, options);
+    const body = await response.json();
     const extensionPackageId = body.data.id;
 
     console.log(

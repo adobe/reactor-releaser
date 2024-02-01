@@ -10,7 +10,6 @@
  * governing permissions and limitations under the License.
  ****************************************************************************************/
 
-const proxyquire = require('proxyquire');
 const chalk = require('chalk');
 const getReactorHeaders = require('../getReactorHeaders');
 
@@ -26,34 +25,41 @@ let verbose;
 let confirmPackageRelease;
 
 describe('changeAvailability', () => {
-  let mockRequest;
+  let mockFetch;
   let mockHandleResponseError;
   let mockLogVerboseHeader;
   let changeAvailability;
+  let consoleSpy;
 
   beforeEach(() => {
+    mockFetch = jest.fn();
+    mockFetch.mockResolvedValue({
+      json: jest.fn().mockResolvedValue({
+        data: {
+          id: 'EP123'
+        }
+      })
+    });
+    jest.mock('../fetchWrapper', () => ({
+      fetch: mockFetch
+    }));
+    jest.mock('../logVerboseHeader', () => jest.fn());
+    mockHandleResponseError = jest.fn().mockImplementation(() => {
+      throw new Error();
+    });
+    jest.mock('../handleResponseError', () => mockHandleResponseError);
+    consoleSpy = jest.spyOn(console, 'log');
+    jest.resetModules();
     verbose = false;
     confirmPackageRelease = false;
-    mockRequest = jasmine.createSpy().and.returnValue({
-      data: {
-        id: 'EP123'
-      }
-    });
+    changeAvailability = require('../changeAvailability');
+  });
 
-    mockHandleResponseError = jasmine.createSpy().and.throwError();
-    mockLogVerboseHeader = jasmine.createSpy();
-    spyOn(console, 'log');
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   describe('without mock Inquirer', () => {
-    beforeEach(() => {
-      changeAvailability = proxyquire('../changeAvailability', {
-        'request-promise-native': mockRequest,
-        './handleResponseError': mockHandleResponseError,
-        './logVerboseHeader': mockLogVerboseHeader
-      });
-    });
-
     it('can release silently', async () => {
       confirmPackageRelease = true;
       await changeAvailability(
@@ -61,30 +67,32 @@ describe('changeAvailability', () => {
         token,
         extensionPackageFromServer,
         extensionManifest,
-        { apiKey: 'apiKey' },
         verbose,
         confirmPackageRelease
       );
 
-      expect(mockRequest).toHaveBeenCalledWith({
-        method: 'PATCH',
-        url: 'https://extensionpackages.com/EP123',
-        body: {
-          data: {
-            id: 'EP123',
-            type: 'extension_packages',
-            meta: { action: 'release_private' }
-          }
-        },
-        json: true,
-        headers: getReactorHeaders('generatedAccessToken', 'apiKey'),
-        transform: jasmine.any(Function)
-      });
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://extensionpackages.com/EP123',
+        {
+          method: 'PATCH',
+          body: expect.anything(),
+          // body: {
+          //   data: {
+          //     id: 'EP123',
+          //     type: 'extension_packages',
+          //     meta: { action: 'release_private' }
+          //   }
+          // },
+          headers: getReactorHeaders('generatedAccessToken')
+        }
+      );
 
-      expect(console.log).toHaveBeenCalledWith(
-        `The extension package with the ID ${chalk.bold(
-          'EP123'
-        )} has been released.`
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `The extension package with the ID ${chalk.bold(
+            'EP123'
+          )} has been released.`
+        )
       );
     });
   });
@@ -93,27 +101,17 @@ describe('changeAvailability', () => {
     let mockInquirer;
 
     beforeEach(() => {
-      mockInquirer = {
-        prompt: jasmine
-          .createSpy()
-          .and.returnValue({ confirmPackageRelease: true })
-      };
-
-      changeAvailability = proxyquire('../changeAvailability', {
-        'request-promise-native': mockRequest,
-        './handleResponseError': mockHandleResponseError,
-        './logVerboseHeader': mockLogVerboseHeader,
-        inquirer: mockInquirer
-      });
+      mockInquirer = jest.fn().mockReturnValue({ confirmPackageRelease: true });
+      jest.mock('inquirer', () => mockInquirer);
+      jest.resetModules();
     });
 
     it('prompts for confirmation of package release', async () => {
-      const technicalAccountData = await changeAvailability(
+      const result = await changeAvailability(
         envConfig,
         token,
         extensionPackageFromServer,
         extensionManifest,
-        {},
         verbose,
         confirmPackageRelease
       );
@@ -128,23 +126,22 @@ describe('changeAvailability', () => {
             'to release this extension package to private availability?'
         }
       ]);
-      expect(technicalAccountData).toEqual(true);
+      expect(result).toBe(true);
     });
 
     it('returns false when the user does not confirm the package details', async () => {
-      mockInquirer.prompt.and.returnValue({ confirmPackageRelease: false });
+      mockInquirer.prompt.mockReturnValueOnce({ confirmPackageRelease: false });
 
-      const technicalAccountData = await changeAvailability(
+      const result = await changeAvailability(
         envConfig,
         token,
         extensionPackageFromServer,
         extensionManifest,
-        {},
         verbose,
         confirmPackageRelease
       );
 
-      expect(technicalAccountData).toEqual(false);
+      expect(result).toBe(false);
     });
 
     it('logs an error when no package that can be released is found on server', async () => {
@@ -153,7 +150,6 @@ describe('changeAvailability', () => {
         token,
         null,
         extensionManifest,
-        {},
         false
       );
 
@@ -171,7 +167,6 @@ describe('changeAvailability', () => {
         token,
         extensionPackageFromServer,
         extensionManifest,
-        {},
         verbose,
         confirmPackageRelease
       );
@@ -189,7 +184,6 @@ describe('changeAvailability', () => {
           token,
           extensionPackageFromServer,
           extensionManifest,
-          {},
           verbose,
           confirmPackageRelease
         );

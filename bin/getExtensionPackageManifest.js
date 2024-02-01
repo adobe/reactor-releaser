@@ -16,6 +16,7 @@ module.exports = () => {
   try {
     return require(path.resolve(process.cwd(), './extension.json'));
   } catch (e) {
+    console.log(e.message);
     throw new Error(
       'Cannot find the extension manifest. Make sure you execute the \
 command from inside the extension directory that you want to release.'
