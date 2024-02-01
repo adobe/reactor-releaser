@@ -1,5 +1,5 @@
 {
   "trailingComma": "none",
   "singleQuote": true,
-  "camelCase": "warn"
+  "space-before-function-paren": ["error", "always"]
 }
