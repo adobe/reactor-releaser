@@ -19,7 +19,6 @@ module.exports = async (
   envConfig,
   accessToken,
   extensionPackageManifest,
-  { apiKey },
   verbose
 ) => {
   const options = {
@@ -32,7 +31,7 @@ module.exports = async (
       'filter[platform]': `EQ ${extensionPackageManifest.platform}`,
       'filter[availability]': 'EQ development'
     },
-    headers: getReactorHeaders(accessToken, apiKey),
+    headers: getReactorHeaders(accessToken),
     transform: JSON.parse
   };
 
