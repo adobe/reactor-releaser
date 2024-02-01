@@ -10,25 +10,23 @@
  * governing permissions and limitations under the License.
  ****************************************************************************************/
 
-const proxyquire = require('proxyquire');
-
 describe('getEnvironment', () => {
-  let getEnvironment = require('../getEnvironment');
+  let getEnvironment;
   let mockInquirer;
 
   beforeEach(() => {
     mockInquirer = {};
-    getEnvironment = proxyquire('../getEnvironment', {
-      inquirer: mockInquirer
-    });
+    jest.mock('inquirer', () => mockInquirer);
+    jest.resetModules();
+    getEnvironment = require('../getEnvironment');
   });
 
   it('returns environment argument', () => {
     const result = getEnvironment({
-      environment: 'qe'
+      environment: 'stage'
     });
 
-    expect(result).toBe('qe');
+    expect(result).toBe('stage');
   });
 
   it('returns production as default', () => {

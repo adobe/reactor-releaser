@@ -10,7 +10,6 @@
  * governing permissions and limitations under the License.
  ****************************************************************************************/
 
-const proxyquire = require('proxyquire');
 const getReactorHeaders = require('../getReactorHeaders');
 
 describe('getExtensionPackageFromServer', () => {
@@ -22,42 +21,52 @@ describe('getExtensionPackageFromServer', () => {
     name: 'fake-extension',
     platform: 'web'
   };
-  let mockRequest;
+
+  let mockFetch;
+  let mockFetchJsonHandler;
   let mockHandleResponseError;
-  let mockLogVerboseHeader;
   let getExtensionPackageFromServer;
+  let consoleSpy;
+
+  const _constructedURL = new URL('https://extensionpackages');
+  _constructedURL.search = new URLSearchParams({
+    'page[size]': 1,
+    'page[number]': 1,
+    'filter[name]': 'EQ fake-extension',
+    'filter[platform]': 'EQ web',
+    'filter[availability]': 'EQ development'
+  }).toString();
+
+  const expectedURL = _constructedURL.toString();
 
   const expectedRequestOptions = {
     method: 'GET',
-    url: 'https://extensionpackages',
-    qs: {
-      'page[size]': 1,
-      'page[number]': 1,
-      'filter[name]': 'EQ fake-extension',
-      'filter[platform]': 'EQ web',
-      'filter[availability]': 'EQ development'
-    },
-    headers: getReactorHeaders('fake-token', 'apiKey'),
-    transform: JSON.parse
+    headers: getReactorHeaders('fake-token')
   };
 
   beforeEach(() => {
-    mockRequest = jasmine.createSpy();
-    mockHandleResponseError = jasmine.createSpy().and.throwError();
-    mockLogVerboseHeader = jasmine.createSpy();
-    getExtensionPackageFromServer = proxyquire(
-      '../getExtensionPackageFromServer',
-      {
-        'request-promise-native': mockRequest,
-        './handleResponseError': mockHandleResponseError,
-        './logVerboseHeader': mockLogVerboseHeader
-      }
-    );
-    spyOn(console, 'log');
+    mockFetchJsonHandler = jest.fn();
+    mockFetch = jest.fn().mockResolvedValue({
+      json: mockFetchJsonHandler
+    });
+    jest.mock('../fetchWrapper', () => ({
+      fetch: mockFetch
+    }));
+    mockHandleResponseError = jest.fn().mockImplementation(() => {
+      throw new Error();
+    });
+    jest.mock('../handleResponseError', () => mockHandleResponseError);
+    jest.resetModules();
+    getExtensionPackageFromServer = require('../getExtensionPackageFromServer.js');
+    consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('returns ID from existing extension package', async () => {
-    mockRequest.and.returnValue({
+    mockFetchJsonHandler.mockResolvedValue({
       data: [
         {
           id: 'EP123'
@@ -69,15 +78,15 @@ describe('getExtensionPackageFromServer', () => {
       envConfig,
       accessToken,
       extensionPackageManifest,
-      { apiKey: 'apiKey' }
+      {}
     );
 
-    expect(mockRequest).toHaveBeenCalledWith(expectedRequestOptions);
+    expect(mockFetch).toHaveBeenCalledWith(expectedURL, expectedRequestOptions);
     expect(result.id).toBe('EP123');
   });
 
   it('returns null if no extension package found', async () => {
-    mockRequest.and.returnValue({
+    mockFetchJsonHandler.mockResolvedValue({
       data: []
     });
 
@@ -85,30 +94,32 @@ describe('getExtensionPackageFromServer', () => {
       envConfig,
       accessToken,
       extensionPackageManifest,
-      { apiKey: 'apiKey' }
+      {}
     );
 
-    expect(mockRequest).toHaveBeenCalledWith(expectedRequestOptions);
+    expect(mockFetch).toHaveBeenCalledWith(expectedURL, expectedRequestOptions);
     expect(result).toBeNull();
   });
 
   it('calls handleResponseError on response error', async () => {
     const error = new Error();
-    mockRequest.and.throwError(error);
+    mockFetchJsonHandler.mockImplementationOnce(() => {
+      throw error;
+    });
 
     try {
       await getExtensionPackageFromServer(
         envConfig,
         accessToken,
         extensionPackageManifest,
-        { apiKey: 'apiKey' }
+        {}
       );
     } catch (e) {}
 
-    expect(mockRequest).toHaveBeenCalledWith(expectedRequestOptions);
+    expect(mockFetch).toHaveBeenCalledWith(expectedURL, expectedRequestOptions);
     expect(mockHandleResponseError).toHaveBeenCalledWith(
       error,
-      jasmine.any(String)
+      expect.any(String)
     );
   });
 
@@ -118,13 +129,12 @@ describe('getExtensionPackageFromServer', () => {
         envConfig,
         accessToken,
         extensionPackageManifest,
-        { apiKey: 'apiKey' },
-        true
+        { verbose: true }
       );
     } catch (e) {}
 
-    expect(mockLogVerboseHeader).toHaveBeenCalledWith(
-      'Retrieving extension package from server'
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Retrieving extension package from server')
     );
   });
 });

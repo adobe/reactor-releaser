@@ -10,28 +10,27 @@
  * governing permissions and limitations under the License.
  ****************************************************************************************/
 
-const proxyquire = require('proxyquire').noCallThru();
 const path = require('path');
+const getExtensionPackageManifest = require('../getExtensionPackageManifest');
 
 describe('getExtensionPackageManifest', () => {
-  it('returns extension manifest from the current folder', async () => {
-    const getExtensionPackageManifest = proxyquire(
-      '../getExtensionPackageManifest',
-      {
-        [path.resolve(process.cwd(), './extension.json')]: {
-          name: 'extensionname'
-        }
-      }
-    );
+  const testDirName = path.resolve(__dirname);
+  let processCwdSpy;
 
-    expect(getExtensionPackageManifest().name).toBe('extensionname');
+  beforeEach(() => {
+    processCwdSpy = jest.spyOn(process, 'cwd').mockReturnValue(testDirName);
+    jest.spyOn(console, 'log').mockImplementation();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('throws error for extension package zip without extension.json', async () => {
     let errorMessage;
 
     try {
-      require('../getExtensionPackageManifest')();
+      getExtensionPackageManifest();
     } catch (error) {
       errorMessage = error.message;
     }
@@ -40,5 +39,6 @@ describe('getExtensionPackageManifest', () => {
       'Cannot find the extension manifest. Make sure you execute the \
 command from inside the extension directory that you want to release.'
     );
+    expect(processCwdSpy).toHaveBeenCalled();
   });
 });
