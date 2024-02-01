@@ -1,6 +1,6 @@
 {
   "name": "@adobe/reactor-releaser",
-  "version": "3.1.2",
+  "version": "4.0.0-beta.1",
   "description": "Command line tool for releasing Tags extensions.",
   "author": {
     "name": "Adobe Systems",
@@ -20,18 +20,18 @@
     "reactor-releaser": "./bin/index.js"
   },
   "scripts": {
-    "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json",
-    "test:watch": "nodemon --exec jasmine JASMINE_CONFIG_PATH=jasmine.json",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watchAll",
     "lint": "eslint 'bin/**'"
   },
   "dependencies": {
-    "@adobe/jwt-auth": "^2.0.0",
+    "@adobe/auth-token": "^1.0.0-beta.13",
     "chalk": "^4.1.0",
     "inquirer": "^7.3.2",
     "prettyjson": "^1.2.1",
     "request": "^2.88.0",
     "request-debug": "^0.2.0",
-    "request-promise-native": "^1.0.7",
+    "request-promise-native": "^0.0.0",
     "yargs": "^15.4.1"
   },
   "devDependencies": {
@@ -39,13 +39,11 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-header": "^3.1.1",
     "eslint-plugin-prettier": "^4.2.1",
-    "jasmine": "^3.4.0",
-    "jasmine-expect": "^4.0.1",
-    "nodemon": "^2.0.19",
-    "prettier": "^2.0.5",
-    "proxyquire": "^2.1.0"
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.3",
+    "prettier": "^2.0.5"
   },
   "engines": {
-    "node": ">=14.21.2"
+    "node": ">=18.19.0"
   }
 }
