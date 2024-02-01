@@ -22,7 +22,6 @@ module.exports = async (
   accessToken,
   extensionPackageFromServer,
   extensionPackageManifest,
-  { apiKey },
   verbose,
   confirmPackageRelease = false
 ) => {
@@ -70,7 +69,7 @@ this extension package to private availability?`
       }
     },
     json: true,
-    headers: getReactorHeaders(accessToken, apiKey),
+    headers: getReactorHeaders(accessToken),
     transform: (body) => body
   };
 

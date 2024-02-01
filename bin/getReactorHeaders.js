@@ -10,12 +10,12 @@
  * governing permissions and limitations under the License.
  ****************************************************************************************/
 
-module.exports = (accessToken, apiKey) => {
+module.exports = (accessToken) => {
   return {
     Accept: 'application/vnd.api+json;revision=1',
     'Content-Type': 'application/vnd.api+json',
     'Cache-control': 'no-cache',
     Authorization: `Bearer ${accessToken}`,
-    'X-Api-Key': apiKey
+    'X-Api-Key': 'Activation-DTM'
   };
 };

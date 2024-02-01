@@ -47,18 +47,20 @@ const argv = require('yargs')
     environment: {
       type: 'string',
       describe:
-        'The environment to which the extension package \
-        should be released (for Adobe internal use only).',
-      choices: ['stage', 'qe', 'integration']
+        'The environment to which the extension package should be uploaded.',
+      choices: ['development', 'stage', 'production'],
+      default: 'production'
     },
     verbose: {
       type: 'boolean',
-      describe: 'Logs additional information useful for debugging.'
+      describe: 'Logs additional information useful for debugging.',
+      validate: true
     },
     'confirm-package-release': {
       type: 'boolean',
       describe:
-        'Skips the confirmation that the extension is the one you wish to release.'
+        'Skips the confirmation that the extension is the one you wish to release.',
+      validate: true
     }
   })
   .epilogue(
@@ -72,7 +74,6 @@ const getExtensionPackageManifest = require('./getExtensionPackageManifest');
 const getExtensionPackageFromServer = require('./getExtensionPackageFromServer');
 const envConfig = require('./envConfig');
 const changeAvailability = require('./changeAvailability');
-const getTechnicalAccountData = require('./getTechnicalAccountData');
 
 (async () => {
   try {
@@ -92,30 +93,16 @@ const getTechnicalAccountData = require('./getTechnicalAccountData');
     }
 
     const environment = getEnvironment(argv);
-    if (environment === 'qe') {
-      console.log(
-        chalk.bold.red(
-          "'--environment=qe' is currently redirecting to '--environment=stage' on your behalf, " +
-            'and will be removed in the future.'
-        )
-      );
-      console.log(chalk.bold.red("Prefer usage of '--environment=stage'."));
-    }
     const envSpecificConfig = envConfig[environment];
-    const technicalAccountData = await getTechnicalAccountData(
-      envSpecificConfig,
-      argv
-    );
     const integrationAccessToken = await getIntegrationAccessToken(
       envSpecificConfig,
-      technicalAccountData
+      argv
     );
     const extensionPackageManifest = getExtensionPackageManifest();
     const extensionPackageFromServer = await getExtensionPackageFromServer(
       envSpecificConfig,
       integrationAccessToken,
       extensionPackageManifest,
-      technicalAccountData,
       argv.verbose
     );
 
@@ -124,9 +111,8 @@ const getTechnicalAccountData = require('./getTechnicalAccountData');
       integrationAccessToken,
       extensionPackageFromServer,
       extensionPackageManifest,
-      technicalAccountData,
       argv.verbose,
-      argv['confirm-package-release']
+      argv.confirmPackageRelease
     );
   } catch (error) {
     if (argv.verbose || !error.code) {
