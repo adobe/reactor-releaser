@@ -75,21 +75,18 @@ describe('changeAvailability', () => {
           headers: {
             ...getReactorHeaders('generatedAccessToken')
           },
-          body: expect.any(FormData)
+          body: expect.anything()
         }
       );
 
-      const formData = fetch.mock.calls[0][1].body;
-      const formDataObject = JSON.parse(formData.get('data'));
-      console.log(formDataObject.id);
-
-      expect(formDataObject).toEqual(
-        expect.objectContaining({
+      const body = fetch.mock.calls[0][1].body;
+      expect(JSON.parse(body)).toEqual({
+        data: {
           id: 'EP123',
           type: 'extension_packages',
           meta: { action: 'release_private' }
-        })
-      );
+        }
+      });
 
       expect(consoleSpy).toHaveBeenCalledWith(
         `The extension package with the ID ${chalk.bold(
