@@ -25,7 +25,7 @@ To use the releaser in a question-answer format, run the releaser tool by execut
 npx @adobe/reactor-releaser
 ```
 
-The releaser tool will ask for any information necessary to release the extension. It will fetch available packages from the Reactor API that are available for release.
+The releaser tool will ask for any information necessary to release the extension. Run the command from the directory containing your `extension.json` file.
 
 ### Command Line Arguments
 

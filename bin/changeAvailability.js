@@ -57,21 +57,18 @@ this extension package to private availability?`
   }
 
   const url = `${envConfig.extensionPackages}/${extensionPackageFromServer.id}`;
-  const formData = new FormData();
-  formData.append(
-    'data',
-    JSON.stringify({
-      id: extensionPackageFromServer.id,
-      type: 'extension_packages',
-      meta: {
-        action: 'release_private'
-      }
-    })
-  );
   const options = {
     method: 'PATCH',
     headers: getReactorHeaders(accessToken),
-    body: formData
+    body: JSON.stringify({
+      data: {
+        id: extensionPackageFromServer.id,
+        type: 'extension_packages',
+        meta: {
+          action: 'release_private'
+        }
+      }
+    })
   };
 
   try {
