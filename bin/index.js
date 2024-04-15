@@ -88,7 +88,7 @@ const changeAvailability = require('./changeAvailability');
       envSpecificConfig,
       integrationAccessToken,
       extensionPackageManifest,
-      argv.verbose
+      argv
     );
 
     await changeAvailability(
