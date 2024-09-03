@@ -77,6 +77,7 @@ const changeAvailability = require('./changeAvailability');
 
 (async () => {
   try {
+    console.log('running local')
     const environment = getEnvironment(argv);
     const envSpecificConfig = envConfig[environment];
     const integrationAccessToken = await getIntegrationAccessToken(
