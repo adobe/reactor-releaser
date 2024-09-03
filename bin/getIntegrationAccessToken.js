@@ -16,6 +16,7 @@ const getEnvironment = require('./getEnvironment');
 const logVerboseHeader = require('./logVerboseHeader');
 const getAuthToken = (...args) =>
   import('@adobe/auth-token').then(({ auth }) => auth(...args));
+const promptValidators = require('./promptValidators');
 
 const authSchemes = ['oauth-server-to-server'];
 // as of January 11, 2024, we identified that 'read_organizations' and
@@ -64,7 +65,7 @@ ${authSchemes.join(',')}`
         type: 'input',
         name: 'clientId',
         message: 'What is your clientId?',
-        validate: true
+        validate: promptValidators.stringValidator
       }
     ]));
   }
@@ -77,7 +78,7 @@ ${authSchemes.join(',')}`
         type: 'input',
         name: 'clientSecret',
         message: 'What is your clientSecret?',
-        validate: true
+        validate: promptValidators.stringValidator
       }
     ]));
   }
