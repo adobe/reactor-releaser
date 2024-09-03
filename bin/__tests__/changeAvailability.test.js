@@ -19,7 +19,9 @@ jest.mock('node-fetch');
 jest.mock('../handleResponseError');
 jest.mock('../logVerboseHeader');
 jest.mock('inquirer', () => ({
-  prompt: jest.fn().mockResolvedValue({ confirmPackageRelease: true })
+  default: {
+    prompt: jest.fn().mockResolvedValue({ confirmPackageRelease: true })
+  }
 }));
 
 const fetch = require('node-fetch');
@@ -107,7 +109,7 @@ describe('changeAvailability', () => {
         confirmPackageRelease
       );
 
-      expect(inquirer.prompt).toHaveBeenCalledWith([
+      expect(inquirer.default.prompt).toHaveBeenCalledWith([
         {
           type: 'confirm',
           name: 'confirmPackageRelease',

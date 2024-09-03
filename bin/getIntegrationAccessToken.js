@@ -11,7 +11,7 @@
  ****************************************************************************************/
 
 /* eslint-disable global-require */
-const inquirer = require('inquirer');
+const inquirer = require('inquirer').default;
 const getEnvironment = require('./getEnvironment');
 const logVerboseHeader = require('./logVerboseHeader');
 const getAuthToken = (...args) =>

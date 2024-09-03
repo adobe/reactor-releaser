@@ -12,7 +12,7 @@
 
 const chalk = require('chalk');
 const fetchWrapper = require('./fetchWrapper');
-const inquirer = require('inquirer');
+const inquirer = require('inquirer').default;
 const getReactorHeaders = require('./getReactorHeaders');
 const handleResponseError = require('./handleResponseError');
 const logVerboseHeader = require('./logVerboseHeader');
