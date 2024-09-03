@@ -21,7 +21,7 @@ module.exports = async (
   extensionPackageManifest,
   argv
 ) => {
-  if (argv.verbose) {
+  if (Boolean(argv?.verbose)) {
     logVerboseHeader('Retrieving extension package from server');
   }
 
