@@ -16,46 +16,51 @@
 const argv = require('yargs')
   .usage('Usage: $0 [options]')
   .options({
-    'private-key': {
+    'auth.scheme': {
       type: 'string',
-      describe:
-        'For authentication using an Adobe I/O integration. The local path (relative or absolute) to the RSA private key. Instructions on how to generate this key can be found in the Getting Started guide (https://developer.adobelaunch.com/guides/extensions/getting-started/) and should have been used when creating your integration through the Adobe I/O console. Optionally, rather than passing the private key path as a command line argument, it can instead be provided by setting one of the following environment variables, depending on the environment that will be receiving the extension package: REACTOR_IO_INTEGRATION_PRIVATE_KEY_DEVELOPMENT, REACTOR_IO_INTEGRATION_PRIVATE_KEY_QE, REACTOR_IO_INTEGRATION_PRIVATE_KEY_STAGE, REACTOR_IO_INTEGRATION_PRIVATE_KEY. REACTOR_IO_INTEGRATION_PRIVATE_KEY_QE is deprecated in favor of REACTOR_IO_INTEGRATION_PRIVATE_KEY_STAGE and will be removed in the future.'
+      description: 'The method to obtain an access token',
+      choices: ['oauth-server-to-server'],
+      default: 'oauth-server-to-server'
     },
-    'org-id': {
+    'auth.client-id': {
       type: 'string',
-      describe:
-        'For authentication using an Adobe I/O integration. Your organization ID. You can find this on the overview screen for the integration you have created within the Adobe I/O console (https://console.adobe.io).'
+      description:
+        'For authentication using an Adobe I/O integration. Your Client ID. You can find this on the overview screen for the integration you have created within the Adobe I/O console (https://console.adobe.io). Optionally, rather than passing the Client ID as a command line argument, it can instead be provided by setting one of the following environment variables, depending on the environment that will be receiving the extension package: REACTOR_IO_INTEGRATION_CLIENT_ID_DEVELOPMENT, REACTOR_IO_INTEGRATION_CLIENT_ID_STAGE, REACTOR_IO_INTEGRATION_CLIENT_ID'
     },
-    'tech-account-id': {
+    'auth.client-secret': {
       type: 'string',
-      describe:
-        'For authentication using an Adobe I/O integration. Your technical account ID. You can find this on the overview screen for the integration you have created within the Adobe I/O console (https://console.adobe.io).'
+      description:
+        'For authentication using an Adobe I/O integration. Your Client Secret. You can find this on the overview screen for the integration you have created within the Adobe I/O console (https://console.adobe.io). Optionally, rather than passing the Client Secret as a command line argument, it can instead be provided by setting one of the following environment variables, depending on the environment that will be receiving the extension package: REACTOR_IO_INTEGRATION_CLIENT_SECRET_DEVELOPMENT, REACTOR_IO_INTEGRATION_CLIENT_SECRET_STAGE, REACTOR_IO_INTEGRATION_CLIENT_SECRET'
     },
-    'api-key': {
+    'auth.scope': {
       type: 'string',
-      describe:
-        'For authentication using an Adobe I/O integration. Your API key/Client ID. You can find this on the overview screen for the integration you have created within the Adobe I/O console (https://console.adobe.io).'
+      description:
+        'a comma-separated list of override scopes to request (e.g. openid,AdobeID,' +
+        'read_organizations,....)'
     },
-    'client-secret': {
+    'auth.access-token': {
       type: 'string',
       describe:
-        'For authentication using an Adobe I/O integration. Your client secret. You can find this on the overview screen for the integration you have created within the Adobe I/O console (https://console.adobe.io). Optionally, rather than passing the client secret as a command line argument, it can instead be provided by setting one of the following environment variables, depending on the environment that will be receiving the extension package:  REACTOR_IO_INTEGRATION_CLIENT_SECRET_DEVELOPMENT, REACTOR_IO_INTEGRATION_CLIENT_SECRET_QE, REACTOR_IO_INTEGRATION_CLIENT_SECRET_STAGE, REACTOR_IO_INTEGRATION_CLIENT_SECRET. REACTOR_IO_INTEGRATION_CLIENT_SECRET_QE is deprecated in favor of REACTOR_IO_INTEGRATION_CLIENT_SECRET_STAGE and will be removed in the future.'
+        'An access token to use, as supplied by an environment variable or other means. Replaces ' +
+        'the need to supply client-id, client-secret, and scope.'
     },
     environment: {
       type: 'string',
       describe:
-        'The environment to which the extension package \
-        should be released (for Adobe internal use only).',
-      choices: ['stage', 'qe', 'integration']
+        'The environment to which the extension package should be uploaded.',
+      choices: ['development', 'stage', 'production'],
+      default: 'production'
     },
     verbose: {
       type: 'boolean',
-      describe: 'Logs additional information useful for debugging.'
+      describe: 'Logs additional information useful for debugging.',
+      validate: true
     },
     'confirm-package-release': {
       type: 'boolean',
       describe:
-        'Skips the confirmation that the extension is the one you wish to release.'
+        'Skips the confirmation that the extension is the one you wish to release.',
+      validate: true
     }
   })
   .epilogue(
@@ -69,50 +74,20 @@ const getExtensionPackageManifest = require('./getExtensionPackageManifest');
 const getExtensionPackageFromServer = require('./getExtensionPackageFromServer');
 const envConfig = require('./envConfig');
 const changeAvailability = require('./changeAvailability');
-const getTechnicalAccountData = require('./getTechnicalAccountData');
 
 (async () => {
   try {
-    if (argv.verbose) {
-      require('request-debug')(require('request-promise-native'), function (
-        type,
-        data,
-        r
-      ) {
-        const filteredData = { ...data };
-        if (filteredData.headers && filteredData.headers.Authorization) {
-          filteredData.headers.Authorization = 'Bearer [USER_ACCESS_TOKEN]';
-        }
-        console.error({ [type]: filteredData });
-        return r;
-      });
-    }
-
     const environment = getEnvironment(argv);
-    if (environment === 'qe') {
-      console.log(
-        chalk.bold.red(
-          "'--environment=qe' is currently redirecting to '--environment=stage' on your behalf, " +
-            'and will be removed in the future.'
-        )
-      );
-      console.log(chalk.bold.red("Prefer usage of '--environment=stage'."));
-    }
     const envSpecificConfig = envConfig[environment];
-    const technicalAccountData = await getTechnicalAccountData(
-      envSpecificConfig,
-      argv
-    );
     const integrationAccessToken = await getIntegrationAccessToken(
       envSpecificConfig,
-      technicalAccountData
+      argv
     );
     const extensionPackageManifest = getExtensionPackageManifest();
     const extensionPackageFromServer = await getExtensionPackageFromServer(
       envSpecificConfig,
       integrationAccessToken,
       extensionPackageManifest,
-      technicalAccountData,
       argv.verbose
     );
 
@@ -121,9 +96,8 @@ const getTechnicalAccountData = require('./getTechnicalAccountData');
       integrationAccessToken,
       extensionPackageFromServer,
       extensionPackageManifest,
-      technicalAccountData,
       argv.verbose,
-      argv['confirm-package-release']
+      argv.confirmPackageRelease
     );
   } catch (error) {
     if (argv.verbose || !error.code) {

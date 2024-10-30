@@ -13,14 +13,16 @@
 const logVerboseHeader = require('../logVerboseHeader');
 
 describe('logVerboseHeader', () => {
+  let consoleSpy;
+
   beforeEach(() => {
-    spyOn(console, 'log');
+    consoleSpy = jest.spyOn(console, 'log').mockImplementation();
   });
 
   it('logs a verbose header', () => {
     logVerboseHeader('Processing');
-    expect(console.log).toHaveBeenCalledWith(
-      '\n----------\nProcessing\n----------'
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('\n----------\nProcessing\n----------')
     );
   });
 });

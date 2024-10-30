@@ -11,8 +11,8 @@
  ****************************************************************************************/
 
 const chalk = require('chalk');
-const request = require('request-promise-native');
-const inquirer = require('inquirer');
+const fetchWrapper = require('./fetchWrapper');
+const inquirer = require('inquirer').default;
 const getReactorHeaders = require('./getReactorHeaders');
 const handleResponseError = require('./handleResponseError');
 const logVerboseHeader = require('./logVerboseHeader');
@@ -22,7 +22,6 @@ module.exports = async (
   accessToken,
   extensionPackageFromServer,
   extensionPackageManifest,
-  { apiKey },
   verbose,
   confirmPackageRelease = false
 ) => {
@@ -57,10 +56,11 @@ this extension package to private availability?`
     logVerboseHeader('Releasing package');
   }
 
+  const url = `${envConfig.extensionPackages}/${extensionPackageFromServer.id}`;
   const options = {
     method: 'PATCH',
-    url: `${envConfig.extensionPackages}/${extensionPackageFromServer.id}`,
-    body: {
+    headers: getReactorHeaders(accessToken),
+    body: JSON.stringify({
       data: {
         id: extensionPackageFromServer.id,
         type: 'extension_packages',
@@ -68,14 +68,12 @@ this extension package to private availability?`
           action: 'release_private'
         }
       }
-    },
-    json: true,
-    headers: getReactorHeaders(accessToken, apiKey),
-    transform: (body) => body
+    })
   };
 
   try {
-    const body = await request(options);
+    const response = await fetchWrapper.fetch(url, options);
+    const body = await response.json();
     const extensionPackageId = body.data.id;
 
     console.log(
