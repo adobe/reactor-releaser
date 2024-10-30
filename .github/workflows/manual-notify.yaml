@@ -1,12 +1,13 @@
-name: CI notify
+name: Manual notify
 
 # Only trigger, when the build workflow succeeded
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       tag:
-        required: true
-        type: 'string'
+        description: 'The tag to publish to: latest | next'
+        required: false
+        default: 'latest'
 
 jobs:
   notify-on-success:
